@@ -45,13 +45,33 @@ async function callAiFunction(payload) {
     throw error
   }
 
-  const data = JSON.parse(execution.responseBody || '{}')
+  if (execution.status !== 'completed') {
+    throw new Error(`AI Function did not complete. Status: ${execution.status}. ${execution.errors || execution.responseBody || ''}`.trim())
+  }
+
+  if (!execution.responseBody) {
+    throw new Error('AI Function returned an empty response. Check the Appwrite Function code and make sure it returns res.json({ content: "..." }).')
+  }
+
+  let data
+
+  try {
+    data = JSON.parse(execution.responseBody)
+  } catch {
+    throw new Error(`AI Function returned non-JSON response: ${execution.responseBody.slice(0, 200)}`)
+  }
 
   if (data.error) {
     throw new Error(data.error)
   }
 
-  return data.content || ''
+  const content = data.content || data.output || data.text || ''
+
+  if (!content.trim()) {
+    throw new Error('AI Function completed but returned empty content. Check that your function returns the model text in a "content" field.')
+  }
+
+  return content
 }
 
 export async function generateNoteInsights({ title = '', content = '' }) {

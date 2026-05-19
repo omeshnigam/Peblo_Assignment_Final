@@ -8,10 +8,12 @@ function AIAssistant({ title, content, getContent, onUseTitle, onInsertContent }
   const [loading, setLoading] = useState(false)
   const [draftLoading, setDraftLoading] = useState(false)
   const [error, setError] = useState('')
+  const [status, setStatus] = useState('')
 
   const runAi = async () => {
     setLoading(true)
     setError('')
+    setStatus('')
 
     try {
       const latestContent = getContent ? getContent() : content
@@ -22,6 +24,7 @@ function AIAssistant({ title, content, getContent, onUseTitle, onInsertContent }
         suggestedTitles: Array.isArray(insights.suggestedTitles) ? insights.suggestedTitles : [],
       })
       recordAiUsage()
+      setStatus('AI insights generated.')
     } catch (error) {
       setError(error.message)
     } finally {
@@ -32,11 +35,13 @@ function AIAssistant({ title, content, getContent, onUseTitle, onInsertContent }
   const runDraft = async () => {
     setDraftLoading(true)
     setError('')
+    setStatus('')
 
     try {
       const draft = await generateNoteDraft(draftPrompt)
       onInsertContent?.(draft)
       recordAiUsage()
+      setStatus('Generated note inserted into the editor.')
     } catch (error) {
       setError(error.message)
     } finally {
@@ -88,6 +93,12 @@ function AIAssistant({ title, content, getContent, onUseTitle, onInsertContent }
       {error && (
         <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
           {error}
+        </p>
+      )}
+
+      {status && (
+        <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm font-semibold text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+          {status}
         </p>
       )}
 
