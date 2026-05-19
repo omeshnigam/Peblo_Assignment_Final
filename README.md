@@ -37,7 +37,7 @@ There is no custom Node/Express backend in this project. The backend is Appwrite
 - npm installed
 - Appwrite project configured
 - TinyMCE API key
-- Optional: OpenRouter API key for AI features
+- Appwrite Function configured for AI features
 
 ## Install Dependencies
 
@@ -60,8 +60,7 @@ VITE_APPWRITE_BUCKET_ID=
 
 VITE_API_KEY=
 
-VITE_OPENROUTER_API_KEY=
-VITE_OPENROUTER_MODEL=openai/gpt-4o-mini
+VITE_APPWRITE_AI_FUNCTION_ID=
 ```
 
 Variable meaning:
@@ -73,10 +72,9 @@ Variable meaning:
 - `VITE_APPWRITE_COLLECTION_ID`: Notes collection ID.
 - `VITE_APPWRITE_BUCKET_ID`: Storage bucket ID for featured images.
 - `VITE_API_KEY`: TinyMCE API key.
-- `VITE_OPENROUTER_API_KEY`: OpenRouter API key.
-- `VITE_OPENROUTER_MODEL`: OpenRouter model used for AI note generation.
+- `VITE_APPWRITE_AI_FUNCTION_ID`: Appwrite Function ID used for AI note generation.
 
-Important: Vite exposes all `VITE_` variables to the browser. For production, call OpenRouter through a backend or Appwrite Function instead of exposing the OpenRouter key in the frontend.
+Important: the OpenRouter API key should live only inside your Appwrite Function environment variables, not in the Vite frontend `.env`.
 
 ## Appwrite Setup
 
@@ -192,13 +190,13 @@ npm run build
 
 ## OpenRouter Notes
 
-The AI assistant uses the OpenRouter Chat Completions API to produce JSON containing:
+The AI assistant calls an Appwrite Function. That function calls the OpenRouter Chat Completions API and returns JSON containing:
 
 - `summary`
 - `actionItems`
 - `suggestedTitles`
 
-If you see a quota, credit, or billing error, check your OpenRouter account usage and credits. The app is passing the API error through so it is visible in the UI.
+If you see a quota, credit, or billing error, check your OpenRouter account usage and credits. The Appwrite Function passes the API error back so it is visible in the UI.
 
 ## Common Issues
 
@@ -211,16 +209,22 @@ Check:
 - Document permission includes `Read: Any`.
 - Storage bucket allows image read access if the public note has an image.
 
-### AI assistant says API key is missing
+### AI assistant says function ID is missing
 
 Add this to `.env`:
 
 ```env
-VITE_OPENROUTER_API_KEY=your_key_here
-VITE_OPENROUTER_MODEL=openai/gpt-4o-mini
+VITE_APPWRITE_AI_FUNCTION_ID=your_function_id
 ```
 
 Then restart the dev server.
+
+Inside Appwrite Function settings, add these server-side variables:
+
+```env
+OPENROUTER_API_KEY=your_key_here
+OPENROUTER_MODEL=openai/gpt-4o-mini
+```
 
 ### OpenRouter quota or credits exceeded
 

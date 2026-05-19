@@ -5,8 +5,7 @@ const conf = {
     appwriteCollectionId: String(import.meta.env.VITE_APPWRITE_COLLECTION_ID),
     appwriteBucketId: String(import.meta.env.VITE_APPWRITE_BUCKET_ID),
     apiKey: String(import.meta.env.VITE_API_KEY),
-    openrouterApiKey: String(import.meta.env.VITE_OPENROUTER_API_KEY || ""),
-    openrouterModel: String(import.meta.env.VITE_OPENROUTER_MODEL || "openai/gpt-4o-mini")
+    appwriteAiFunctionId: String(import.meta.env.VITE_APPWRITE_AI_FUNCTION_ID || "")
 }
 
 export default conf
