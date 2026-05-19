@@ -29,11 +29,21 @@ async function callAiFunction(payload) {
     throw new Error('Missing Appwrite AI Function ID. Add VITE_APPWRITE_AI_FUNCTION_ID to your .env file and restart the dev server.')
   }
 
-  const execution = await functions.createExecution({
-    functionId: conf.appwriteAiFunctionId,
-    body: JSON.stringify(payload),
-    async: false,
-  })
+  let execution
+
+  try {
+    execution = await functions.createExecution({
+      functionId: conf.appwriteAiFunctionId,
+      body: JSON.stringify(payload),
+      async: false,
+    })
+  } catch (error) {
+    if (error?.code === 401 || error?.message?.toLowerCase().includes('execute')) {
+      throw new Error('AI Function execute permission is missing in Appwrite. Open Appwrite Console > Functions > your AI function > Settings/Permissions and allow Users to Execute, then redeploy/retry.')
+    }
+
+    throw error
+  }
 
   const data = JSON.parse(execution.responseBody || '{}')
 
