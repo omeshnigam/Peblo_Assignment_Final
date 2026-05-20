@@ -33,7 +33,7 @@ authService.getCurrentUser()
   }
 })
 .finally(() => setLoading(false))
- }, [])
+ }, [dispatch])
 
   return !loading ? (
     <div className='relative min-h-screen overflow-hidden bg-slate-100 text-slate-950 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100'>

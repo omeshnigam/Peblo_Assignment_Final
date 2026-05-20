@@ -1,4 +1,3 @@
-import React from 'react'
 import { SignUp as SignUpComponent } from '..'
 
 function SignUp() {

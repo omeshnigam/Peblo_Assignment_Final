@@ -15,6 +15,10 @@ export class Service{
     }
 
     getPostPermissions(userId, isPublic = false){
+        if (!userId) {
+            return isPublic ? [Permission.read(Role.any())] : []
+        }
+
         const permissions = [
             Permission.read(Role.user(userId)),
             Permission.update(Role.user(userId)),

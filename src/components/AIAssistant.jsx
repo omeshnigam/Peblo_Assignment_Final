@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { generateNoteDraft, generateNoteInsights } from '../services/openai'
 import { recordAiUsage } from '../utils/aiUsage'
 

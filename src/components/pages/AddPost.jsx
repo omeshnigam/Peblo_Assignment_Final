@@ -1,4 +1,3 @@
-import React from 'react'
 import PostForm from '../post-form/PostForm'
 import Container from '../container/Container'
 

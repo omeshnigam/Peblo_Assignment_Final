@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import {useState, useEffect} from 'react'
 import appwriteService from "../../appwrite/config"
 import NoteDiscovery from '../NoteDiscovery'
 import Container from '../container/Container'

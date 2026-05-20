@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import PostCard from './PostCard'
 import { filterAndSortPosts, getAllTags } from '../utils/posts'
 
