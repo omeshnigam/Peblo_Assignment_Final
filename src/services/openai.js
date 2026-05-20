@@ -24,57 +24,80 @@ function stripHtml(html) {
   return element.textContent || element.innerText || ''
 }
 
-function extractAiContent(data) {
+function extractAiContent(data, seen = new Set()) {
   if (typeof data === 'string') {
     const trimmed = data.trim()
 
     if (!trimmed) return ''
 
     try {
-      return extractAiContent(JSON.parse(trimmed))
+      return extractAiContent(JSON.parse(trimmed), seen)
     } catch {
       return trimmed
     }
   }
 
   if (!data || typeof data !== 'object') return ''
+  if (seen.has(data)) return ''
+  seen.add(data)
 
-  const directText =
-    data.content ||
-    data.output ||
-    data.text ||
-    data.response ||
-    data.result ||
-    data.message ||
-    data.completion ||
-    data.generatedText ||
-    data.generated_text
-
-  if (typeof directText === 'string' && directText.trim()) {
-    return directText
+  if (Array.isArray(data)) {
+    return data.map((item) => extractAiContent(item, seen)).filter(Boolean).join('\n\n')
   }
-
-  const choice = Array.isArray(data.choices) ? data.choices[0] : null
-  const choiceText = choice?.message?.content || choice?.delta?.content || choice?.text
-
-  if (typeof choiceText === 'string' && choiceText.trim()) {
-    return choiceText
-  }
-
-  const nestedText =
-    extractAiContent(data.data) ||
-    extractAiContent(data.body) ||
-    extractAiContent(data.payload) ||
-    extractAiContent(data.result?.content) ||
-    extractAiContent(data.response?.content)
-
-  if (nestedText) return nestedText
 
   if (data.summary || data.actionItems || data.suggestedTitles) {
     return JSON.stringify(data)
   }
 
+  const directText = [
+    data.content,
+    data.output_text,
+    data.text,
+    data.response,
+    data.result,
+    data.message,
+    data.completion,
+    data.generatedText,
+    data.generated_text,
+    data.answer,
+  ].find((value) => typeof value === 'string' && value.trim())
+
+  if (directText) {
+    return directText
+  }
+
+  const choice = Array.isArray(data.choices) ? data.choices[0] : null
+  const choiceText = extractAiContent(choice?.message?.content, seen) || extractAiContent(choice?.delta?.content, seen) || extractAiContent(choice?.text, seen)
+
+  if (choiceText) return choiceText
+
+  const candidates = [
+    data.output,
+    data.content,
+    data.data,
+    data.body,
+    data.payload,
+    data.response,
+    data.result,
+    data.message,
+    data.candidates,
+    data.parts,
+  ]
+
+  for (const candidate of candidates) {
+    const nestedText = extractAiContent(candidate, seen)
+    if (nestedText) return nestedText
+  }
+
   return ''
+}
+
+function getResponsePreview(data) {
+  try {
+    return JSON.stringify(data).slice(0, 500)
+  } catch {
+    return String(data).slice(0, 500)
+  }
 }
 
 async function callAiFunction(payload) {
@@ -121,7 +144,7 @@ async function callAiFunction(payload) {
   const content = extractAiContent(data)
 
   if (!content.trim()) {
-    throw new Error('AI Function completed but returned empty content. Return the model text in a "content" field, or return an OpenAI/OpenRouter choices response.')
+    throw new Error(`AI Function completed but returned empty content. Raw response preview: ${getResponsePreview(data)}`)
   }
 
   return content
@@ -152,6 +175,9 @@ export async function generateNoteDraft(prompt) {
 
   return callAiFunction({
     mode: 'draft',
+    type: 'draft',
+    action: 'draft',
     prompt: cleanPrompt,
+    content: cleanPrompt,
   })
 }
