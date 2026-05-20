@@ -18,7 +18,7 @@ export default function Post() {
 
     const isAuthor = post && userData ? post.userId === userData.$id : false;
     const tags = parseTags(post?.tags);
-    const shareUrl = post ? `${window.location.origin}/share/${post.$id}` : "";
+    const shareUrl = post ? `${window.location.origin}/#/share/${post.$id}` : "";
 
 //     console.log("post.userId:", post?.userId);
 // console.log("userData.$id:", userData?.$id);
