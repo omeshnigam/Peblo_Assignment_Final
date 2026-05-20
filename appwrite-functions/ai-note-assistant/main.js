@@ -56,13 +56,13 @@ export default async ({ req, res, error }) => {
   const payload = readPayload(req)
 
   if (!apiKey) {
-    return res.json({ error: 'Missing OPENROUTER_API_KEY in Appwrite Function variables.' }, 500)
+    return res.json({ error: 'Missing OPENROUTER_API_KEY in Appwrite Function variables.' })
   }
 
   const userPrompt = payload.prompt || payload.content || ''
 
   if (!userPrompt.trim()) {
-    return res.json({ error: 'Missing prompt/content for AI generation.' }, 400)
+    return res.json({ error: 'Missing prompt/content for AI generation.' })
   }
 
   try {
@@ -81,21 +81,28 @@ export default async ({ req, res, error }) => {
       }),
     })
 
-    const data = await response.json()
+    const responseText = await response.text()
+    let data
+
+    try {
+      data = JSON.parse(responseText)
+    } catch {
+      data = { error: { message: responseText || 'OpenRouter returned a non-JSON response.' } }
+    }
 
     if (!response.ok) {
-      return res.json({ error: data?.error?.message || data?.message || 'OpenRouter request failed.' }, response.status)
+      return res.json({ error: data?.error?.message || data?.message || 'OpenRouter request failed.' })
     }
 
     const content = getModelText(data).trim()
 
     if (!content) {
-      return res.json({ error: 'OpenRouter returned an empty model response.' }, 502)
+      return res.json({ error: 'OpenRouter returned an empty model response.' })
     }
 
     return res.json({ content })
   } catch (err) {
-    error(err?.message || String(err))
-    return res.json({ error: 'AI Function failed while calling OpenRouter.' }, 500)
+    error?.(err?.message || String(err))
+    return res.json({ error: `AI Function failed while calling OpenRouter: ${err?.message || String(err)}` })
   }
 }
