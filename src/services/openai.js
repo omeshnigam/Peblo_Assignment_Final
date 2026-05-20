@@ -100,6 +100,17 @@ function getResponsePreview(data) {
   }
 }
 
+function isAppwriteStarterResponse(data) {
+  return Boolean(
+    data &&
+    typeof data === 'object' &&
+    data.motto &&
+    data.learn &&
+    data.connect &&
+    data.getInspired
+  )
+}
+
 async function callAiFunction(payload) {
   if (!conf.appwriteAiFunctionId) {
     throw new Error('Missing Appwrite AI Function ID. Add VITE_APPWRITE_AI_FUNCTION_ID to your .env file and restart the dev server.')
@@ -139,6 +150,10 @@ async function callAiFunction(payload) {
 
   if (data.error) {
     throw new Error(data.error)
+  }
+
+  if (isAppwriteStarterResponse(data)) {
+    throw new Error('Your Appwrite AI Function is still running the default starter code. Deploy the AI note assistant function code from appwrite-functions/ai-note-assistant, then retry.')
   }
 
   const content = extractAiContent(data)
